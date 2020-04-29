@@ -1,0 +1,46 @@
+#!/bin/bash
+# The interpreter used to execute the script
+
+#“#SBATCH” directives that convey submission options:
+
+#SBATCH --job-name=open_nmt_model_pre-process
+#SBATCH --mail-user=gsbhatia@umich.edu
+#SBATCH --mail-type=BEGIN,FAIL,END
+
+
+
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:1
+#SBATCH --nodes=1
+
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=24gb
+
+#SBATCH --time=02:00:00 
+
+#SBATCH --account=si630w20_class
+
+#SBATCH --output=log_test_process.log
+# The application(s) to execute along with its input arguments and options:
+
+source open_nmt_env/bin/activate
+# gigaword_copy_acc_51.78_ppl_11.71_e20.pt
+# sum_transformer_model_acc_57.25_ppl_9.22_e16.pt
+onmt_translate -gpu 0 \
+               -batch_size 10 \
+               -beam_size 10 \
+               -model ./models/sum_transformer_model_acc_57.25_ppl_9.22_e16.pt \
+               -src   m4.txt.src \
+               -output ./out/m4.out \
+               -min_length 35 \
+               -verbose \
+               -stepwise_penalty \
+               -coverage_penalty summary \
+               -beta 5 \
+               -length_penalty wu \
+               -alpha 0.9 \
+               -verbose \
+               -block_ngram_repeat 3 \
+               -ignore_when_blocking "." "</t>" "<t>"
+
